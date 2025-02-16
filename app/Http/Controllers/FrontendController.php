@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Frontend\job\StoreJobRequest;
 use App\Http\Requests\Frontend\JobAplication\StoreJobApplicationRequest;
+use App\Http\Requests\Frontend\UpdateProfilePictureRequest;
 use App\Mail\JobNotificationMail;
 use App\Models\Experience;
 use App\Models\Job;
@@ -12,9 +13,11 @@ use App\Models\JobCategory;
 use App\Models\JobType;
 use App\Models\SaveJob;
 use App\Models\User;
+use App\Models\UserImage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 
 class FrontendController extends Controller
 {
@@ -25,10 +28,7 @@ class FrontendController extends Controller
         $latestJobs = Job::latest()->take(6)->where('status', 1)->get();
         return view('frontend.index', compact('jobCategories', 'jobs', 'latestJobs'));
     }
-    public function profile()
-    {
-        return view('frontend.Auth.profile');
-    }
+
     public function job()
     {
         $jobCategories = JobCategory::where('status', 1)->get();
@@ -38,7 +38,7 @@ class FrontendController extends Controller
     }
     public function myJobs()
     {
-        $jobs = Job::where('mobile_user_id', Auth::user()->id)->with('jobType')->latest()->paginate(5);
+        $jobs = Job::where('user_id', Auth::user()->id)->with('jobType')->latest()->paginate(5);
         // dd($jobs);
         return view('frontend.myjob', compact('jobs'));
     }
@@ -46,7 +46,7 @@ class FrontendController extends Controller
 
     public function findJob()
     {
-        //  dd(request('keyword'),request('location'),request('job_category_id'),request('job_type_id'),request('experience_id'));   
+        //  dd(request('keyword'),request('location'),request('job_category_id'),request('job_type_id'),request('experience_id'));
         $jobCategories = JobCategory::where('status', 1)->get();
         $jobTypes = JobType::where('status', 1)->get();
         $experiences = Experience::where('status', 1)->get();
@@ -88,98 +88,127 @@ class FrontendController extends Controller
 
 
 
-    public function jobapply(StoreJobApplicationRequest $request, Job $job)
-    {
-        $userId = auth()->id();
-
-        // Check if the user has already applied for this job
-        if (JobApplication::where('user_id', $userId)->where('job_id', $job->id)->exists()) {
-            return redirect()->back()->with('error', 'You have already applied for this job');
-        }
-
-        //check you are not apply on your own job
-        $employerId = $job->user_id;
-        if ($employerId == Auth::user()->id) {
-            return redirect()->back()->with('error', 'You are not allowed to apply to your own job');
-        }
+    public function jobapply(Job $job)
+{
+    $userId = Auth::user()->id;
 
 
-        // If no existing application, create a new one
-        JobApplication::create([
-            'user_id'      => $userId,
-            'employer_id'  => $job->user_id,
-            'job_id'       => $job->id,
-            'applied_date' => now(),
-        ]);
-
-        //send mail notification
-        $employer = User::where('id', $employerId)->first();
-        $mailData = [
-            'employer' => $employer,
-            'user' => Auth::user(),
-            'job' => $job,
-        ];
-
-        Mail::to($employer->email)->send(new JobNotificationMail($mailData));
-
-        return redirect()->back()->with('success', 'Job applied successfully!');
+    if (JobApplication::where('user_id', $userId)->where('job_id', $job->id)->exists()) {
+        toast('You have already applied for this job', 'warning');
+        return redirect()->back();
     }
+
+    // Check if the user is trying to apply to their own job
+    if ($job->user_id == $userId) {
+        toast('You are not allowed to apply to your own job', 'warning');
+        return back();
+    }
+
+    // Create a new job application
+    JobApplication::create([
+        'user_id'      => $userId,
+        'employer_id' => $job->user_id,
+        'job_id'       => $job->id,
+        'applied_date' => now(),
+    ]);
+
+    // Send email notification to the employer
+    $employer = User::find($job->user_id); // Use `find` instead of `where` for simplicity
+    $mailData = [
+        'employer' => $employer,
+        'user'     => Auth::user(),
+        'job'      => $job,
+    ];
+
+    Mail::to($employer->email)->send(new JobNotificationMail($mailData));
+
+    // Notify the user of successful application
+    toast('Job Applied Successfully', 'success');
+    return back();
+}
 
 
     public function appliedjob()
     {
-        $jobApplications = JobApplication::where('user_id',Auth::user()->id)->with(['job','job.jobType'])->simplePaginate(5);
+        $jobApplications = JobApplication::where('user_id', Auth::user()->id)->with(['job', 'job.jobType'])->simplePaginate(5);
         // dd($jobs);
-   
+
         return view('frontend.appliedjob', compact('jobApplications'));
     }
-     
+
     public function deleteAppliedJob(Request $request, $id)
     {
         $jobApplication = jobApplication::find($id);
         if (!$jobApplication) {
-            return back()->with('error', 'Applied job not found');
+            toast('Applied job not found', 'error');
+            return back();
         }
         $jobApplication->delete();
-
-        return back()->with('success', 'Applied job deleted successfully');
+        toast('Applied job deleted successfully', 'success');
+        return back();
     }
 
-    public function savejob( Job $job)
+    public function savejob($jobId)
     {
+        // Find the job by ID
+        $job = Job::find($jobId);
+
+        // Check if the job exists
+        if (!$job) {
+            toast('Job not found.', 'error');
+            return redirect()->back();
+        }
+
         $userId = auth()->id();
+
+        // Check if the job is already saved by the user
         if (SaveJob::where('user_id', $userId)->where('job_id', $job->id)->exists()) {
-            return redirect()->back()->with('error', 'You have already saved this job');
+            toast('You have already saved this job.', 'error');
+            return redirect()->back();
         }
-        $employerId = $job->user_id;
-        if ($employerId == Auth::user()->id) {
-            return redirect()->back()->with('error', 'You are not allowed to save to your own job');
+
+        // Check if the user is trying to save their own job
+        if ($job->user_id == $userId) {
+            toast('Your are trying to save your own job', 'error');
+            return redirect()->back();;
         }
+
+        // Save the job
         SaveJob::create([
-            'user_id'      => $userId,
-            'job_id'       => $job->id,
+            'user_id'    => $userId,
+            'job_id'     => $job->id,
             'saved_date' => now(),
         ]);
-        
-        return redirect()->back()->with('success', 'Job saved successfully!');
+
+        // Success message
+        toast('Job saved successfully!', 'success');
+
+        return redirect()->back();
     }
 
     public function saveJoblist()
     {
         //fetch applicants
-        $savejobs=SaveJob::where('user_id',Auth::user()->id)->with(['job','job.jobType'])->simplepaginate(5);
-        
-        return view('frontend.savejoblist',compact('savejobs'));
+        $savejobs = SaveJob::where('user_id', Auth::user()->id)->with(['job', 'job.jobType'])->simplepaginate(5);
+
+        return view('frontend.savejoblist', compact('savejobs'));
     }
     public function deleteSavedJob(Request $request, $id)
     {
         $savejob = SaveJob::find($id);
         if (!$savejob) {
-            return back()->with('error', 'Saved job not found');
+            return back()->with('Saved job not found', 'error');
         }
         $savejob->delete();
-
-        return back()->with('success', 'Saved job removed successfully');
+        toast('Saved job removed successfully', 'success');
+        return back();
     }
-    
+
+    // public function updateProfile(UpdateProfilePictureRequest $request, UserImage $userImage)
+    // {
+    //     $userImage->update($request->validated(),['user_id'=>Auth::user()->id]);
+    //     return back()->with('success', 'Profile picture updated successfully');
+    // }
+
+
 }

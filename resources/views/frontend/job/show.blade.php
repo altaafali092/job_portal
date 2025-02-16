@@ -18,17 +18,7 @@
             <div class="row pb-5">
 
                 <div class="col-md-8">
-                    @if (session('success'))
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <strong>{{ session('success') }}</strong>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    @elseif (session('error'))
-                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                            <strong class="text-danger">{{ session('error') }}</strong>
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    @endif
+                   
                     <div class="card shadow border-0">
                         <div class="job_details_header">
                             <div class="single_jobs white-bg d-flex justify-content-between">
@@ -80,7 +70,7 @@
                                 <ul>
                                     <li>{{ strip_tags($job->benefit ?? '') }}</li>
                                 </ul>
-                               
+
                             </div>
                             <div class="border-bottom"></div>
                             <div class="pt-3 text-end">

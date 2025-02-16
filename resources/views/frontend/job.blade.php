@@ -41,7 +41,7 @@
                                             @foreach ($jobCategories as $jobCategory)
                                                 <option value="{{ $jobCategory->id }}">{{ $jobCategory->name }}</option>
                                             @endforeach
-                                            
+
                                         </select>
                                         @error('job_category_id')
                                             <div class="text-danger"> {{ $message }}</div>
@@ -104,8 +104,7 @@
                                 </div>
                                 <div class="mb-4">
                                     <label for="" class="mb-2">Description<span class="req">*</span></label>
-                                    <textarea class="textarea" name="description" id="description" cols="5" rows="5"
-                                        placeholder="Description"></textarea>
+                                    <textarea class="textarea" name="description" id="description" cols="5" rows="5" placeholder="Description"></textarea>
                                     @error('description')
                                         <div class="text-danger"> {{ $message }}</div>
                                     @enderror
@@ -178,7 +177,8 @@
                 </div>
             </div>
     </section>
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+
+    {{-- <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -186,7 +186,9 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form>
+                    <form  action ="{{ route('profile.updatePicture',$userImage)}}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        @method('PUT')
                         <div class="mb-3">
                             <label for="exampleInputEmail1" class="form-label">Profile Image</label>
                             <input type="file" class="form-control" id="image" name="image">
@@ -200,7 +202,5 @@
                 </div>
             </div>
         </div>
-    </div>
-
-   
+    </div> --}}
 @endsection

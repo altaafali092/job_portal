@@ -13,17 +13,18 @@
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/frontend/asset/css/style.css') }}" />
     <link rel="stylesheet" type="text/css" href="{{ asset('assets/frontend/asset/css/style2.css') }}" />
 
-    <!--texteditor--> 
+    <!--texteditor-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Trumbowyg/2.27.3/ui/trumbowyg.min.css" integrity="sha512-Fm8kRNVGCBZn0sPmwJbVXlqfJmPC13zRsMElZenX6v721g/H7OukJd8XzDEBRQ2FSATK8xNF9UYvzsCtUpfeJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-   
+
     <!-- Fav Icon -->
     <link rel="shortcut icon" type="image/x-icon" href="#" />
     <script src="https://cdn.lordicon.com/lordicon.js"></script>
 </head>
 
 <body data-instant-intensity="mousedown">
+    @include('sweetalert::alert')
    @include('frontend.layouts.header')
-   
+
 @yield('content')
    @include('frontend.layouts.footer')
     <script src="{{ asset('assets/frontend/asset/js/jquery-3.6.0.min.js') }}"></script>

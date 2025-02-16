@@ -29,8 +29,16 @@ Route::post('/loginpost',[AuthController::class,'loginpost'])->name('loginpost')
 Route::get('/logout',[AuthController::class,'logout'])->name('logout');
 
 
-Route::get('/profile',[FrontendController::class,'profile'])->name('profile');
-Route::get('/profilepic',[FrontendController::class,'profilepic'])->name('profilepic');
+
+
+
+Route::get('/profile', [AuthController::class, 'profile'])->name('profile');
+Route::post('/profile/update', [AuthController::class, 'update'])->name('profile.update');
+Route::post('/profile/password', [AuthController::class, 'updatePassword'])->name('profile.updatePassword');
+Route::post('/profile/updatePhoto', [AuthController::class, 'updatePhoto'])->name('profile.photoUpdate');
+
+
+// Route::get('/profilepic',[FrontendController::class,'profilepic'])->name('profilepic');
 // Route::get('/job',[FrontendController::class,'job'])->name('job');
 Route::resource('/job',jobsController::class);
 Route::get('/myJobs',[FrontendController::class,'myJobs'])->name('myJobs');
@@ -47,6 +55,8 @@ Route::delete('/appliedjob/{id}', [FrontendController::class, 'deleteAppliedJob'
 Route::get('job/{job}/save-jobs',[FrontendController::class,'savejob'])->name('savejob');
 Route::get('/save-jobs',[FrontendController::class,'saveJoblist'])->name('saveJoblist');
 Route::delete('/savedjob/{id}', [FrontendController::class, 'deleteSavedJob'])->name('savedjob.delete');
+
+
 
 
 

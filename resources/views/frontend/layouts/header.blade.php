@@ -19,7 +19,7 @@
                         <a class="nav-link {{ Request::routeIs('job') ? 'active' : '' }}" aria-current="page" href="{{'job'}}">Post Jobs</a>
                     </li>
                     @endauth
-                    
+
                 </ul>
 
 
@@ -28,11 +28,11 @@
                     <span class="navbar-text me-2">
                         <a class="btn btn-outline-primary me-2" href="{{ route('profile') }}" type="submit"> {{ Auth::user()->name }}</a>
                     </span>
-                   
+
                 @else
                     <!-- User is not logged in, display login and post job buttons -->
                     <a class="btn btn-outline-primary me-2" href="{{ route('login') }}" type="submit">Login</a>
-                    
+
                 @endauth
             </div>
         </div>

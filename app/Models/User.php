@@ -21,7 +21,13 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'phone',
+        'designation',
+        'role',
+        'image',
+
     ];
+
 
     /**
      * The attributes that should be hidden for serialization.
@@ -43,9 +49,8 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
     public function jobApplications()
-{
-    return $this->hasMany(JobApplication::class);
-}
+    {
+        return $this->hasMany(JobApplication::class);
+    }
 
 }
-

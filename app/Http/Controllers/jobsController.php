@@ -10,6 +10,7 @@ use App\Models\jobApplication;
 use App\Models\JobCategory;
 use App\Models\JobType;
 use App\Models\SaveJob;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class jobsController extends Controller
@@ -19,13 +20,14 @@ class jobsController extends Controller
      */
     public function index()
     {
+        $user= User::all();
         $jobCategories = JobCategory::where('status', 1)->get();
         $jobTypes = JobType::where('status', 1)->get();
         $experiences = Experience::where('status', 1)->get();
         return view('frontend.job', compact('jobCategories', 'jobTypes', 'experiences'));
     }
 
-  
+
     public function Store(StoreJobRequest $request)
     {
         Job::create($request->validated()+ ['user_id' => auth()->id()]);
@@ -39,11 +41,11 @@ class jobsController extends Controller
     {
         $applicants = jobApplication::where('job_id', $job->id)->with('user')->get();
 
-    
-    
+
+
         return view('frontend.job.show', compact('job', 'applicants'));
     }
-    
+
 
     /**
      * Show the form for editing the specified resource.
@@ -53,7 +55,7 @@ class jobsController extends Controller
         $jobCategories = JobCategory::where('status', 1)->get();
         $jobTypes = JobType::where('status', 1)->get();
         $experiences = Experience::where('status', 1)->get();
-    
+
        return view('frontend.job.edit',compact('job','jobCategories', 'jobTypes', 'experiences'));
     }
 

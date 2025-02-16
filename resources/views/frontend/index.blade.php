@@ -25,7 +25,7 @@
             <div class="card border-0 shadow p-5">
                 <form action="{{ route('search.findJob') }}" method="GET" name="searchForm" id="searchForm">
                 <div class="row">
-            
+
                     <div class="col-md-3 mb-3 mb-sm-3 mb-lg-0">
                         <input type="text" class="form-control" name="job_name" id="search" placeholder="Keywords">
                     </div>
@@ -87,7 +87,7 @@
                                         <div class="card border-0 p-3 shadow mb-4">
                                             <div class="card-body">
                                                 <h3 class="border-0 fs-5 pb-2 mb-0">{{ $job->job_name??'' }}</h3>
-                                                <p>{{ Str::limit($job->description ?? '', 100, '...') }}</p>
+                                                <p>{{ Str::limit(strip_tags($job->description ?? ''), 100, '...') }}</p>
                                                 <div class="bg-light p-3 border">
                                                     <p class="mb-0">
                                                         <span class="fw-bolder"><i class="fa fa-map-marker"></i></span>
